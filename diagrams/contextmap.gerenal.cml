@@ -1,0 +1,193 @@
+// --------------------------------------------------------------------------------
+// Bounded Contexts
+// --------------------------------------------------------------------------------
+
+
+BoundedContext UserWallet implements WalletsDomain
+{
+	type = FEATURE
+	domainVisionStatement = "Esse contexto lida com todas as carteiras que o usuário possui no sistema"
+	implementationTechnology = "C#"
+	responsibilities = "???"
+	
+	Aggregate Wallet
+}
+BoundedContext Withdrawals implements WithdrawalsDomain
+{
+	type = FEATURE
+	domainVisionStatement = "Esse contexto lida com pedidos de saques e depósitos, devendo estar corretamente alinhado com os contextos que tratam de valores"
+	implementationTechnology = "???"
+	responsibilities = "???"
+	
+	Aggregate WithdrawalRequest
+}
+BoundedContext NftTransaction implements NftDomain
+{
+	type = FEATURE
+	domainVisionStatement = "Contexto responsável por executar transações (compra/venda) de NFT"
+	implementationTechnology = "???"
+	responsibilities = "???"
+	
+	Aggregate NftTransaction
+}
+BoundedContext NftCreation  implements NftDomain
+{
+	type = FEATURE
+	domainVisionStatement = "Contexto responsável por criar novas NFTs para o usuário"
+	implementationTechnology = "???"
+	responsibilities = "???"
+	
+	Aggregate NftCreation
+}
+BoundedContext Transactions  implements TransactionsDomain
+{
+	type = FEATURE
+	domainVisionStatement = "Contexto responsável poe lidar com as transações (compra/venda) de qualquer moeda"
+	implementationTechnology = "???"
+	responsibilities = "???"
+	
+	Aggregate Transaction
+}
+
+BoundedContext AccountsRequests  implements AccountsDomain
+{
+	type = FEATURE
+	domainVisionStatement = "Contexto responsável por lidar com o pedido de criação de contas na plataforma"
+	implementationTechnology = "???"
+	responsibilities = "???"
+	
+	Aggregate AccountRequest
+}
+BoundedContext AccountsCancellations  implements AccountsDomain
+{
+	type = FEATURE
+	domainVisionStatement = "Contexto responsável por lidar com pedidos de cancelamentos, seja pelo usuário, seja por decisão interna ou por decisão de órgão reculador."
+	implementationTechnology = "???"
+	responsibilities = "???"
+	
+	Aggregate AccountCancellationRequest
+}
+BoundedContext AccountsCreation implements AccountsDomain
+{
+	type = FEATURE
+	domainVisionStatement = "Contexto responsável por realizar a criação de uma conta, bem como validar se há autorização de órgãos de crédito e afins."
+	implementationTechnology = "???"
+	responsibilities = "???"
+	
+	Aggregate AccountCreationRequest
+}
+BoundedContext Logins  implements LoginsDomain
+{
+	type = APPLICATION
+	domainVisionStatement = "Contexto responsável pelo login, logout e todo o controle de segurança relacionado ao tema."
+	implementationTechnology = "???"
+	responsibilities = "???"
+	
+	Aggregate Login
+}
+BoundedContext InternalWallet  implements WalletsDomain
+{
+	type = FEATURE
+	domainVisionStatement = "Contexto responsável por lidar com as contas reais em bancos (para fiat) e carteiras reais em possa da Anselmex (para crypto)"
+	implementationTechnology = "???"
+	responsibilities = "???"
+	
+	Aggregate InternalWallet
+}
+
+BoundedContext CreditBody implements CreditBodyDomain
+{
+	type = FEATURE
+	domainVisionStatement = "Contexto responsável por lidar com órgãos externos competentes que validam a condição de crédito do usuário."
+	implementationTechnology = "???"
+	responsibilities = "???"
+	
+	Aggregate Credit
+}
+
+
+
+
+
+// --------------------------------------------------------------------------------
+// Domains
+// --------------------------------------------------------------------------------
+Domain CryptocurrencyExchangeDomain {
+
+	// Core
+	Subdomain WalletsDomain {
+		type = CORE_DOMAIN
+		domainVisionStatement = "Sub-domínio responsável por criar carteiras para o usuário utilizar. Também é responsável pelo controle das contas utilizadas pela corretora (fiat ou crypto). Também lida com a autorização de uso de carteiras ou de cancelamento delas."
+	}
+	Subdomain WithdrawalsDomain {
+		type = CORE_DOMAIN
+		domainVisionStatement = "Sub-domínio responsável por fazer saques ou remessas para a conta corretora, seja em moedas fiat ou crypto."
+	}
+	Subdomain NftDomain {
+		type = CORE_DOMAIN
+		domainVisionStatement = "Sub-domínio responsável por criar, listar, remover, comprar, vender, etc. NFTs dentro da plataforma."
+	}
+	Subdomain TransactionsDomain {
+		type = CORE_DOMAIN
+		domainVisionStatement = "Sub-domínio responsável por fazer ordens de compra e venda, efetivamente comprar e vender moedas (fiat x crypto, crypto x crypto)"
+	}
+
+	// Support
+	Subdomain AccountsDomain {
+		type = SUPPORTING_DOMAIN
+		domainVisionStatement = "Sub-domínio responsável por receber solicitações, criar contas, validar (podendo utilizar terceiros), fazer kyc, validação de documentos, e afins."
+	}
+
+	Subdomain LoginsDomain {
+		type = SUPPORTING_DOMAIN
+		domainVisionStatement = "Sub-domínio responsável por lidar com a conta de usuário, permissões e direitos do usuário."
+	}
+
+
+	// Generic
+	Subdomain CreditBodyDomain {
+		type = GENERIC_SUBDOMAIN
+		domainVisionStatement = "Responsável por lidar com entidades externas que auxiliem em fazer verificações de crédito (como SPC, SERASA)."
+	}
+
+}
+
+
+// --------------------------------------------------------------------------------
+// Context Map
+// --------------------------------------------------------------------------------
+ContextMap Anselmex {
+
+	type = SYSTEM_LANDSCAPE
+	state = TO_BE
+
+	contains UserWallet , InternalWallet 
+	contains Withdrawals 
+	contains NftCreation , NftTransaction 
+	contains Transactions 
+	contains AccountsRequests , AccountsCancellations, AccountsCreation
+	contains Logins
+	contains CreditBody
+	
+	AccountsRequests [P]<->[P]  AccountsCreation
+	AccountsCreation [U,S]->[D,C]  AccountsCancellations
+	AccountsCreation [P]<->[P] UserWallet
+	AccountsCreation [U]->[D,ACL] CreditBody
+	AccountsCreation [U,S]->[D,C] Withdrawals
+
+	Logins  [D,C]<-[U,S]  AccountsCreation
+	Logins  [D,CF]<-[U]  AccountsCancellations
+	
+	Withdrawals [D,C]<-[U,S] InternalWallet
+	Withdrawals [D,C]<-[U,S]  UserWallet
+	Withdrawals [D,C]<-[U,S]  NftTransaction
+	Withdrawals [D,C]<-[U,S]  NftCreation
+	Withdrawals [D,C]<-[U,S]  Transactions
+
+	UserWallet [U,OHS]->[D] Transactions
+	UserWallet [U,OHS]->[D]  NftTransaction
+	UserWallet [P]<->[P]  InternalWallet
+
+	
+	
+}

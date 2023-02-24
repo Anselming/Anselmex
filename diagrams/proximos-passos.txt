@@ -1,0 +1,15 @@
+- Fazer a parte de requisição de login salvar no banco sempre que for solicitada.
+    - Criar a estrutura de repositório que suporte as necessidades desse domínio
+    - Considerar um banco exclusivo para essa aplicação
+    - Criar estruturas para exposição via API das funcionalidades criadas
+    - Acessar via postman/curl e testar na prática o uso
+
+- Observar elementos do DDD táticos e como poderiam ser para estar melhor organizados para a solução
+    - Executar os pequenos ajustes
+    - Criar as agregações principais de cada domínio
+    - Definir um plano para o projeto com todas as tarefas
+    - Considerar que esse projeto será um monolito
+
+- Teste
+    - Adicionar componentes de teste na solução
+

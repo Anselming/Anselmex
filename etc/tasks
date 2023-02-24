@@ -1,4 +1,0 @@
-* Entender como utilizar bem a extensão do docker no VSCode
-* Criar a solução Angular integrada com o VSCode (no docker)
-* Empacotar a solução angular no container
-* Fazer o proxy apontar para a solução correta do Angular
